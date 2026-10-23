@@ -95,17 +95,17 @@ class GraniteMoeSWAConfig(PreTrainedConfig):
         "layers.*.self_attn.v_proj": "colwise",
         "layers.*.self_attn.o_proj": "rowwise",
         "layers.*.self_attn.sinks": "colwise",
-        "layers.*.block_sparse_moe.experts.gate_up_proj": "packed_colwise",
-        "layers.*.block_sparse_moe.experts.down_proj": "rowwise",
-        "layers.*.block_sparse_moe.experts": "moe_tp_experts",
+        "layers.*.mlp.experts.gate_up_proj": "packed_colwise",
+        "layers.*.mlp.experts.down_proj": "rowwise",
+        "layers.*.mlp.experts": "moe_tp_experts",
     }
     # Expert-parallel plan: shard the routed experts across ranks (each rank owns a slice of the
     # experts) with the router driving the dispatch. The optional shared expert is left replicated.
     base_model_ep_plan = {
-        "layers.*.block_sparse_moe.router": "ep_router",
-        "layers.*.block_sparse_moe.experts.gate_up_proj": "grouped_gemm",
-        "layers.*.block_sparse_moe.experts.down_proj": "grouped_gemm",
-        "layers.*.block_sparse_moe.experts": "moe_tp_experts",
+        "layers.*.mlp.gate": "ep_router",
+        "layers.*.mlp.experts.gate_up_proj": "grouped_gemm",
+        "layers.*.mlp.experts.down_proj": "grouped_gemm",
+        "layers.*.mlp.experts": "moe_tp_experts",
     }
 
     sliding_window: int | None = 128

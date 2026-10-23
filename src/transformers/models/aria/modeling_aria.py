@@ -254,11 +254,12 @@ class AriaTextTopKRouter(nn.Module):
     logits only, which is equivalent to renormalizing a softmax taken over every expert.
     """
 
-    def __init__(self, config: AriaTextConfig):
+    def __init__(self, config):
         super().__init__()
-        self.num_experts = config.moe_num_experts
         self.top_k = config.moe_topk
-        self.weight = nn.Parameter(torch.empty(self.num_experts, config.hidden_size))
+        self.num_experts = config.moe_num_experts
+        self.hidden_dim = config.hidden_size
+        self.weight = nn.Parameter(torch.empty(self.num_experts, self.hidden_dim))
 
     def forward(self, hidden_states: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         router_logits = nn.functional.linear(hidden_states, self.weight)  # (num_tokens, num_experts)
