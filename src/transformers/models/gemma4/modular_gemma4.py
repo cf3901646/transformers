@@ -1118,7 +1118,7 @@ class Gemma4TextExperts(Qwen2MoeExperts):
     pass
 
 
-class Gemma4TextRouter(nn.Module):
+class Gemma4TextTopKRouter(nn.Module):
     def __init__(self, config: Gemma4TextConfig):
         super().__init__()
         self.config = config
@@ -1171,7 +1171,7 @@ class Gemma4TextDecoderLayer(Gemma3DecoderLayer):
 
         self.enable_moe_block = config.enable_moe_block
         if self.enable_moe_block:
-            self.router = Gemma4TextRouter(config)
+            self.router = Gemma4TextTopKRouter(config)
             self.experts = Gemma4TextExperts(config)
             self.post_feedforward_layernorm_1 = Gemma4RMSNorm(self.hidden_size, eps=config.rms_norm_eps)
             self.post_feedforward_layernorm_2 = Gemma4RMSNorm(self.hidden_size, eps=config.rms_norm_eps)
@@ -1277,7 +1277,7 @@ class Gemma4PreTrainedModel(Gemma3nPreTrainedModel):
                 init.copy_(getattr(module, f"{layer_type}_original_inv_freq"), curr_inv_freq)
         elif isinstance(module, Gemma4TextScaledWordEmbedding):
             init.constant_(module.embed_scale, module.scalar_embed_scale)
-        elif isinstance(module, Gemma4TextRouter):
+        elif isinstance(module, Gemma4TextTopKRouter):
             init.ones_(module.scale)
             init.ones_(module.per_expert_scale)
         elif isinstance(module, Gemma4TextExperts):
@@ -1300,7 +1300,7 @@ class Gemma4PreTrainedModel(Gemma3nPreTrainedModel):
 class Gemma4TextModel(Gemma3TextModel):
     config: Gemma4TextConfig
     _can_record_outputs = {
-        "router_logits": OutputRecorder(Gemma4TextRouter, index=0),
+        "router_logits": OutputRecorder(Gemma4TextTopKRouter, index=0),
         "hidden_states": Gemma4TextDecoderLayer,
         "attentions": Gemma4TextAttention,
     }

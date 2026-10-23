@@ -676,7 +676,7 @@ class AriaExperts(nn.Module):
         return final_hidden_states
 
 
-class AriaTextMoELayer(nn.Module):
+class AriaTextSparseMoeBlock(nn.Module):
     """Sparsely-gated mixture-of-experts block: router decides, experts compute, shared experts always run."""
 
     def __init__(self, config: AriaTextConfig):
@@ -713,7 +713,7 @@ class AriaTextDecoderLayer(LlamaDecoderLayer):
 
     def __init__(self, config: AriaTextConfig, layer_idx: int):
         super().__init__(config, layer_idx)
-        self.mlp = AriaTextMoELayer(config)
+        self.mlp = AriaTextSparseMoeBlock(config)
 
 
 @auto_docstring
